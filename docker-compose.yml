@@ -1,0 +1,28 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5673:5672"   # AMQP
+      - "15673:15672" # Web UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+  
+  publisher:
+    build:
+      context: .
+      dockerfile: publisher/Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+  
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
